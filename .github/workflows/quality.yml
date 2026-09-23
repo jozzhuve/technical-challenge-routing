@@ -1,0 +1,31 @@
+name: Validaciones
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Formato
+        run: test -z "$(gofmt -l .)"
+
+      - name: Análisis estático
+        run: go vet ./...
+
+      - name: Pruebas
+        run: go test ./... -race -cover
+
+      - name: Validar imagen Docker
+        run: docker build -t technical-challenge-routing:ci .
